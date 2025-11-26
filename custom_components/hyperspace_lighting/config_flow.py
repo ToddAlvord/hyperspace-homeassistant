@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-from wled import WLED, Device, WLEDConnectionError
+from wled import WLED, Device, WLEDConnectionError, WLEDError
 
 from homeassistant.components import onboarding, zeroconf
 from homeassistant.config_entries import (
@@ -18,7 +18,7 @@ from homeassistant.const import CONF_HOST, CONF_MAC
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_KEEP_MAIN_LIGHT, DEFAULT_KEEP_MAIN_LIGHT, DOMAIN
+from .const import CONF_KEEP_MAIN_LIGHT, DEFAULT_KEEP_MAIN_LIGHT, DOMAIN, LOGGER
 
 
 class WLEDFlowHandler(ConfigFlow, domain=DOMAIN):
@@ -41,10 +41,14 @@ class WLEDFlowHandler(ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
+            host = user_input[CONF_HOST].replace("http://", "").replace("https://", "").rstrip("/")
             try:
-                device = await self._async_get_device(user_input[CONF_HOST])
+                device = await self._async_get_device(host)
             except WLEDConnectionError:
                 errors["base"] = "cannot_connect"
+            except (WLEDError, ValueError) as error:
+                LOGGER.exception("Unexpected error connecting to %s", host)
+                errors["base"] = "unknown"
             else:
                 # Check if brand is Hyperspace
                 if device.info.brand != 'Hyperspace':
@@ -53,12 +57,12 @@ class WLEDFlowHandler(ConfigFlow, domain=DOMAIN):
                     return self.async_abort(reason="cct_unsupported")
                 await self.async_set_unique_id(device.info.mac_address)
                 self._abort_if_unique_id_configured(
-                    updates={CONF_HOST: user_input[CONF_HOST]}
+                    updates={CONF_HOST: host}
                 )
                 return self.async_create_entry(
                     title=device.info.name,
                     data={
-                        CONF_HOST: user_input[CONF_HOST],
+                        CONF_HOST: host,
                     },
                 )
         else:
@@ -86,6 +90,9 @@ class WLEDFlowHandler(ConfigFlow, domain=DOMAIN):
             self.discovered_device = await self._async_get_device(discovery_info.host)
         except WLEDConnectionError:
             return self.async_abort(reason="cannot_connect")
+        except (WLEDError, ValueError):
+            LOGGER.exception("Unexpected error connecting to %s", discovery_info.host)
+            return self.async_abort(reason="unknown")
 
         # Check if brand is Hyperspace
         if self.discovered_device.info.brand != 'Hyperspace':
