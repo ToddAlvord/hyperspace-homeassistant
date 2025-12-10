@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from wled import Device as WLEDDevice
+from .vendor.hyperspace_wled import Device as WLEDDevice
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,

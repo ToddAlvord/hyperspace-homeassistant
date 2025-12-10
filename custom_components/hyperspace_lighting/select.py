@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 
-from wled import Live, Playlist, Preset
+from .vendor.hyperspace_wled import Live, Playlist, Preset
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.const import EntityCategory
