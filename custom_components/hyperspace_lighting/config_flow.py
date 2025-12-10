@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-from wled import WLED, Device, WLEDConnectionError, WLEDError
+from .vendor.hyperspace_wled import WLED, Device, WLEDConnectionError, WLEDError
 
 from homeassistant.components import onboarding, zeroconf
 from homeassistant.config_entries import (
