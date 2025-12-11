@@ -375,6 +375,7 @@ class Info:  # pylint: disable=too-many-instance-attributes
     version: AwesomeVersion | None
     version_latest_beta: AwesomeVersion | None
     version_latest_stable: AwesomeVersion | None
+    version_raw: str | None
     websocket: int | None
     wifi: Wifi | None
 
@@ -439,6 +440,7 @@ class Info:  # pylint: disable=too-many-instance-attributes
             version=version,
             version_latest_beta=version_latest_beta,
             version_latest_stable=version_latest_stable,
+            version_raw=data.get("ver"),
             websocket=websocket,
             wifi=Wifi.from_dict(data),
         )
