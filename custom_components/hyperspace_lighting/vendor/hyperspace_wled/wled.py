@@ -58,6 +58,17 @@ class WLED:
         """
         return self._client is not None and not self._client.closed
 
+    def _inject_ip_into_info(self, info: dict[str, Any]) -> None:
+        """Ensure the info payload includes an IP address."""
+        if not info:
+            return
+
+        ip_address = info.get("ip")
+        if ip_address and ip_address != "Unknown":
+            return
+
+        info["ip"] = self.host
+
     async def connect(self) -> None:
         """Connect to the WebSocket of a WLED device.
 
@@ -273,6 +284,7 @@ class WLED:
             except WLEDError:
                 self._supports_presets = False
 
+            self._inject_ip_into_info(data.get("info", {}))
             with suppress(WLEDError):
                 versions = await self.get_wled_versions_from_github()
                 data["info"].update(versions)
@@ -320,6 +332,7 @@ class WLED:
                 )
                 raise WLEDEmptyResponseError(msg)
 
+            self._inject_ip_into_info(info)
             with suppress(WLEDError):
                 versions = await self.get_wled_versions_from_github()
                 info.update(versions)
@@ -334,6 +347,7 @@ class WLED:
             )
             raise WLEDEmptyResponseError(msg)
 
+        self._inject_ip_into_info(state_info.get("info", {}))
         with suppress(WLEDError):
             versions = await self.get_wled_versions_from_github()
             state_info["info"].update(versions)
