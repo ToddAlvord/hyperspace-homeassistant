@@ -44,9 +44,11 @@ class WLEDUpdateEntity(WLEDEntity, UpdateEntity):
     @property
     def installed_version(self) -> str | None:
         """Version currently installed and in use."""
-        if (version := self.coordinator.data.info.version) is None:
-            return None
-        return str(version)
+        if version := self.coordinator.data.info.version:
+            return str(version)
+        if version_raw := self.coordinator.data.info.version_raw:
+            return version_raw
+        return None
 
     @property
     def latest_version(self) -> str | None:
