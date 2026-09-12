@@ -16,7 +16,6 @@ PLATFORMS = (
     Platform.SELECT,
     Platform.SENSOR,
     Platform.SWITCH,
-    Platform.UPDATE,
 )
 
 type WLEDConfigEntry = ConfigEntry[WLEDDataUpdateCoordinator]

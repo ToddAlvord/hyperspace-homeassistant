@@ -285,9 +285,6 @@ class WLED:
                 self._supports_presets = False
 
             self._inject_ip_into_info(data.get("info", {}))
-            with suppress(WLEDError):
-                versions = await self.get_wled_versions_from_github()
-                data["info"].update(versions)
 
             self._device = Device(data)
 
@@ -333,9 +330,6 @@ class WLED:
                 raise WLEDEmptyResponseError(msg)
 
             self._inject_ip_into_info(info)
-            with suppress(WLEDError):
-                versions = await self.get_wled_versions_from_github()
-                info.update(versions)
 
             self._device.update_from_dict({"info": info, "state": state})
             return self._device
@@ -348,9 +342,6 @@ class WLED:
             raise WLEDEmptyResponseError(msg)
 
         self._inject_ip_into_info(state_info.get("info", {}))
-        with suppress(WLEDError):
-            versions = await self.get_wled_versions_from_github()
-            state_info["info"].update(versions)
 
         self._device.update_from_dict(state_info)
 
